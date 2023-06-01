@@ -8,117 +8,87 @@
 #include <iostream>
 
 template <typename T, int Order>
-class BPlusTree{
+class BPlusTree
+{
 public:
-    /**
-     * @brief Class Constructor
-     */
     BPlusTree();
-
-    /**
-     * @brief Class Destructor
-     */
     ~BPlusTree();
-
-    /**
-     * @brief Copies Constructor
-     * @param other Tree to be copied
-     */
-    BPlusTree(const BPlusTree& other);
-
-    /**
-     * @brief Assign operator overload
-     * @param other The tree that is being assigned
-     * @return A reference to the current tree
-     */
-    BPlusTree& operator=(const BPlusTree &other);
-
-    /**
-     * @brief Verifies if a key exists in the tree
-     * @param key Key to be looked for
-     * @return true if the key was found, false otherwise
-     */
-    bool SearchKey(T key);
-
-    /**
-     * @brief Inserts a key in the tree
-     * @param key Key to be inserted
-     */
-    void InsertKey(T key);
-
-    /**
-     * @brief Deletes a key in the tree
-     * @param key Key to be deleted from the tree
-     * @return true if the key was deleted, false otherwise
-     */
-    bool DeleteKey(T key);
-
-    /**
-     * @brief Prints the tree
-     */
-    void Print() const;
-
-    /**
-     * @brief Verifies if the tree is empty
-     * @return true if the tree is empty, false otherwise
-     */
-    bool Empty() const;
-
-    /**
-     * @brief Clears all the elements in the tree
-     */
-    void Clear();
+    BPlusTree(const BPlusTree &bPT);
+    BPlusTree & operator=(const BPlusTree &bPT);
+    void insert(T elemento);
+    void remove(T elemento);
+    bool find(T elemento) const;
+    bool empty() const;
+    void clear();
+    void print() const;
 private:
-    struct Node{
-        bool isLeaf; /**< Indicates if the node is a leaf */
-        int numKeys; /**< Number of keys in the node */
-        T keys[Order - 1]; /**< Array of keys in the node */
-        Node * children[Order]; /**< Array of pointers to the children of this node */
-        Node * nextLeaf; /**< Pointer to the next leaf node */
+    struct Node
+    {
+        void **pointers;    /**> Array of pointers */
+        T *keys;            /**> Array of the keys */
+        Node *parent;
+        bool leaf;
+        int size;           /**> Number of keys */
+        Node *next;         /**> Variable used for queue */
 
-        //TODO check if this constructor is okay
-        Node(){
-            isLeaf = false;
-            numKeys = 0;
+        Node()
+        {
+            pointers = new void*[Order];
+            keys = new T[Order - 1];
+            parent = NULL;
+            leaf = false;
+            size = 0;
+            next = NULL;
         }
+    } * root;
 
-    }*root;
-    /**
- * @brief Internal method for inserting a key in the tree
- * @param node Node where the recursive call will start
- * @param key Key to be inserted in the tree
- */
-    void InsertInternal(Node * node, T key);
-    /**
-     * @brief Internal method for searching a key in the tree
-     * @param node Node where the recursive call will start
-     * @param key Key to be inserted in the tree
-     * @return true if the key was found, false otherwise
-     */
-    bool SearchInternal(Node * node, T key);
-    /**
-     * @brief Internal method for deleting a key in the tree
-     * @param node Node where the recursive call will start
-     * @param key Key to be deleted from the tree
-     * @return true if the key was deleted, false otherwise
-     */
-    bool DeleteInternal(Node *node, T key);
-    /**
-     * @brief Splits the keys of the child node into two nodes
-     * @param parentNode Pointer to the parent of the child node
-     * @param childIndex Index of the child to be split
-     */
-    void SplitChild(Node * parentNode, int childIndex);
-    /**
-     * @brief Merges the keys of two children
-     * @param parentNode Pointer to the parent of the child node
-     * @param childIndex Index of the child to be merged
-     */
-    void MergeChildren(Node * parentNode, int childIndex);
-    /**
-     * @brief Adjusts the keys of the root if needed
-     */
-    void AdjustRoot();
+    /**> Key storage */
+    struct Record
+    {
+        T value;
+        Record(T v) : value(v) {}
+    };
+    /**> Basic functions */
+    Node * insert(Node * root, T key, T value);
+    Node * remove(Node *root, T key);
+    Record * find(Node * root, T key, Node ** leafOut);
+    void printTree(Node * const root);
+
+    /**> Insert functions */
+    Node * insertIntoNode(Node * root, Node * parent, int leftIndex, T key, Node * right);
+    Node * insertIntoLeaf(Node * leaf, T key, Record * pointer);
+    Node * insertIntoParent(Node * root, Node * left, T key, Node * right);
+    Node * insertIntoNewRoot(Node * left, T key, Node * right);
+    Node * insertIntoNodeAfterSplitting(Node * root, Node * parent, int leftIndex, T key, Node * right);
+    Node * insertIntoLeafAfterSplitting(Node * root, Node * leaf, T key, Record * pointer);
+
+    /**> Remove functions */
+    Node * removeEntry(Node * root, Node *n, T key, void * pointer);
+    Node * removeEntryFromNode(Node * n, T key, void * pointer);
+    void destroyTreeNodes(Node * root);
+
+    /**> Find functions */
+    Node * findLeaf(Node * const root, T key);
+
+    /**> Create functions */
+    Node * makeLeaf();
+    Node * startNewTree(T key, Record * tPointer);
+    Record * makeRecord(T value);
+
+    /**> Auxiliar functions */
+    Node * adjustRoot(Node *root);
+    Node * coalesceNodes(Node *root, Node *n, Node *neighbor, int neighborIndex, T kPrime);
+    Node * redistributeNodes(Node *root, Node *n, Node *neighbor, int neighborIndex, int kPrimeIndex, T kPrime);
+    int getNeighborIndex(Node *n);
+    int getLeftIndex(Node * parent, Node * left) const;
+    int cut(int length) const;
+    int pathToRoot(Node * const root, Node * child);
+
+
+    Node * queue;   /**> The queue is used in the print method */
+    /** > Queue functions */
+    void enqueue(Node * newNode);
+    Node * dequeue();
 };
 
 #include "B+Tree.tpp"
