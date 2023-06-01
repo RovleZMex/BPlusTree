@@ -20,7 +20,7 @@ public:
     bool find(T elemento) const;
     bool empty() const;
     void clear();
-    void print() const;
+    void print();
 private:
     struct Node
     {

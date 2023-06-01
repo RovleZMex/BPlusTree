@@ -66,7 +66,7 @@ void BPlusTree<T,Order>::clear()
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T, int Order>
-void BPlusTree<T,Order>::print() const
+void BPlusTree<T,Order>::print()
 {
     printTree(root);
 }
